@@ -41,24 +41,16 @@ spec:
 
     stage('Build & Push Docker Image') {
       steps {
-        script {
-            // If Dockerfile is in a subdirectory like 'app/Dockerfile'
-            if (fileExists('Dockerfile')) { 
-                echo "Dockerfile found. Building and pushing image."
-                container('kaniko') {
-                sh """
-                    /kaniko/executor \\
-                    --context `pwd` \\
-                    --dockerfile Dockerfile \\ 
-                    --destination=${ECR_REGISTRY}/${IMAGE_NAME}:${NEW_IMAGE_TAG} \\
-                    --cache=true \\
-                    --cache-repo=${ECR_REGISTRY}/kaniko-cache \\
-                    --skip-tls-verify=true
-                """
-                }
-            } else {
-                error "Dockerfile not found at Dockerfile. Cannot build Docker image."
-            }
+        container('kaniko') {
+          sh '''
+            /kaniko/executor \\
+              --context `pwd` \\
+              --dockerfile `pwd`/Dockerfile \\
+              --destination=$ECR_REGISTRY/$IMAGE_NAME:$NEW_IMAGE_TAG \\
+              --cache=true \\
+              --insecure \\
+              --skip-tls-verify
+          '''
         }
       }
     }
