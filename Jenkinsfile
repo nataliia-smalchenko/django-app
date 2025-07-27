@@ -24,10 +24,21 @@ spec:
   environment {
     ECR_REGISTRY = "658301803468.dkr.ecr.eu-central-1.amazonaws.com"
     IMAGE_NAME   = "lesson-5-ecr"
-    IMAGE_TAG    = "latest"
+    NEW_IMAGE_TAG    = "${env.BUILD_ID}"
+
+    HELM_REPO_URL    = "https://github.com/nataliia-smalchenko/microservice-project.git"
+    HELM_REPO_BRANCH = "lesson-8-9"
+    HELM_CHART_PATH  = "/lesson-7/charts/django-app/values.yaml"
+    GITHUB_CREDENTIALS_ID = "github-token"
   }
 
   stages {
+    stage('Clean Workspace') {
+      steps {
+        cleanWs() // Очищуємо робочу директорію перед початком
+      }
+    }
+
     stage('Build & Push Docker Image') {
       steps {
         container('kaniko') {
@@ -40,6 +51,49 @@ spec:
               --insecure \\
               --skip-tls-verify
           '''
+        }
+      }
+    }
+
+    stage('Update Helm Chart & Push to Git') {
+      steps {
+        container('git-cli') { 
+          script {
+            // Клонуємо репозиторій з Helm-чартом
+            // `credentials()` використовує GitHub PAT з Jenkins Credentials
+            git branch: "${HELM_REPO_BRANCH}",
+                credentialsId: "${GITHUB_CREDENTIALS_ID}",
+                url: "${HELM_REPO_URL}"
+            
+            // Переходимо до директорії Helm-чарту
+            dir("${env.WORKSPACE}") { // Працюємо в корені клонованого репозиторію
+              // Оновлюємо тег образу в values.yaml
+              // Використовуємо 'yq' для безпечного оновлення YAML, або 'sed'
+              // Приклад для `image.tag`:
+              // image:
+              //   repository: some-repo/image
+              //   tag: old-tag
+              sh """
+                # Встановлюємо yq, якщо він не встановлений в образі alpine/git
+                apk add --no-cache yq
+
+                # Оновлюємо поле image.tag у values.yaml
+                yq eval '.image.tag = "${NEW_IMAGE_TAG}"' -i "${HELM_CHART_PATH}"
+
+                # Оновлюємо також репозиторій образу, якщо потрібно (наприклад, з Docker Hub на ECR)
+                # yq eval '.image.repository = "${ECR_REGISTRY}/${IMAGE_NAME}"' -i "${HELM_CHART_PATH}"
+
+                git config user.email "jenkins@example.com"
+                git config user.name "Jenkins CI"
+                git add "${HELM_CHART_PATH}"
+                git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
+                # [ci skip] - це поширена практика, щоб уникнути нескінченного циклу CI/CD
+                
+                # Пушимо зміни до GitHub
+                git push origin ${HELM_REPO_BRANCH}
+              """
+            }
+          }
         }
       }
     }
