@@ -22,7 +22,7 @@ spec:
   }
 
   environment {
-    ECR_REGISTRY = "658301803468.dkr.ecr.eu-central-1.amazonaws.com"
+    ECR_REGISTRY = "658301803468.dkr.ecr.eu-central-1.amazonaws.com/"
     IMAGE_NAME   = "lesson-5-ecr"
     NEW_IMAGE_TAG    = "${env.BUILD_ID}"
 
@@ -41,16 +41,24 @@ spec:
 
     stage('Build & Push Docker Image') {
       steps {
-        container('kaniko') {
-          sh '''
-            /kaniko/executor \\
-              --context $(pwd) \\
-              --dockerfile $(pwd)/Dockerfile \\
-              --destination=$ECR_REGISTRY/$IMAGE_NAME:$NEW_IMAGE_TAG \\
-              --cache=true \\
-              --insecure \\
-              --skip-tls-verify
-          '''
+        script {
+            // If Dockerfile is in a subdirectory like 'app/Dockerfile'
+            if (fileExists('\$(pwd)/Dockerfile')) { 
+                echo "Dockerfile found. Building and pushing image."
+                container('kaniko') {
+                sh """
+                    /kaniko/executor \\
+                    --context=\$(pwd) \\
+                    --dockerfile=\$(pwd)/Dockerfile \\ 
+                    --destination=${ECR_REGISTRY}/${IMAGE_NAME}:${NEW_IMAGE_TAG} \\
+                    --cache=true \\
+                    --cache-repo=${ECR_REGISTRY}/kaniko-cache \\
+                    --skip-tls-verify=true
+                """
+                }
+            } else {
+                error "Dockerfile not found at app/Dockerfile. Cannot build Docker image."
+            }
         }
       }
     }
