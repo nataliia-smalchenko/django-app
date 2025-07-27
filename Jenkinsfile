@@ -43,13 +43,13 @@ spec:
       steps {
         script {
             // If Dockerfile is in a subdirectory like 'app/Dockerfile'
-            if (fileExists('`pwd`/Dockerfile')) { 
+            if (fileExists('Dockerfile')) { 
                 echo "Dockerfile found. Building and pushing image."
                 container('kaniko') {
                 sh """
                     /kaniko/executor \\
                     --context `pwd` \\
-                    --dockerfile `pwd`/Dockerfile \\ 
+                    --dockerfile Dockerfile \\ 
                     --destination=${ECR_REGISTRY}/${IMAGE_NAME}:${NEW_IMAGE_TAG} \\
                     --cache=true \\
                     --cache-repo=${ECR_REGISTRY}/kaniko-cache \\
@@ -57,7 +57,7 @@ spec:
                 """
                 }
             } else {
-                error "Dockerfile not found at app/Dockerfile. Cannot build Docker image."
+                error "Dockerfile not found at Dockerfile. Cannot build Docker image."
             }
         }
       }
