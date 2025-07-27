@@ -80,11 +80,11 @@ spec:
                 # Оновлюємо поле image.tag у values.yaml
                 yq eval '.image.tag = "${NEW_IMAGE_TAG}"' -i "${HELM_CHART_PATH}"
 
-                # Оновлюємо також репозиторій образу, якщо потрібно (наприклад, з Docker Hub на ECR)
-                # yq eval '.image.repository = "${ECR_REGISTRY}/${IMAGE_NAME}"' -i "${HELM_CHART_PATH}"
+                # Оновлюємо також репозиторій образу
+                yq eval '.image.repository = "${ECR_REGISTRY}/${IMAGE_NAME}"' -i "${HELM_CHART_PATH}"
 
-                git config user.email "jenkins@example.com"
-                git config user.name "Jenkins CI"
+                git config user.email "natalismalcenko@gmail.com"
+                git config user.name "nataliia-smalchenko"
                 git add "${HELM_CHART_PATH}"
                 git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
                 # [ci skip] - це поширена практика, щоб уникнути нескінченного циклу CI/CD
