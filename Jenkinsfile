@@ -44,9 +44,9 @@ spec:
         container('kaniko') {
           sh '''
             /kaniko/executor \\
-              --context `pwd` \\
-              --dockerfile `pwd`/Dockerfile \\
-              --destination=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \\
+              --context $(pwd) \\
+              --dockerfile $(pwd)/Dockerfile \\
+              --destination=$ECR_REGISTRY/$IMAGE_NAME:$NEW_IMAGE_TAG \\
               --cache=true \\
               --insecure \\
               --skip-tls-verify
