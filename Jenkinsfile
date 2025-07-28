@@ -27,6 +27,7 @@ spec:
 """
         }
     }
+    
     environment {
         ECR_REGISTRY = "658301803468.dkr.ecr.eu-central-1.amazonaws.com"
         IMAGE_NAME = "lesson-5-ecr"
@@ -35,19 +36,17 @@ spec:
         HELM_REPO_BRANCH = "main"
         HELM_CHART_PATH = "lesson-7/charts/django-app/values.yaml"
         GITHUB_CREDENTIALS_ID = "github-token"
-
         
-        POSTGRES_HOST = "${env.POSTGRES_HOST}"
+        // Додайте ці змінні в Jenkins Environment Variables
+        POSTGRES_HOST = "${env.POSTGRES_HOST ?: 'your-rds-endpoint.amazonaws.com'}"
         POSTGRES_PORT = "${env.POSTGRES_PORT ?: '5432'}"
-        POSTGRES_NAME = "${env.POSTGRES_NAME}"
-        POSTGRES_USER = "${env.POSTGRES_USER}"
-        POSTGRES_PASSWORD = "${env.POSTGRES_PASSWORD}"
-
+        POSTGRES_NAME = "${env.POSTGRES_NAME ?: 'your_database'}"
+        POSTGRES_USER = "${env.POSTGRES_USER ?: 'postgres'}"
     }
+    
     stages {
         stage('Build & Push Docker Image') {
             steps {
-                steps {
                 container('kaniko') {
                     withCredentials([string(credentialsId: 'postgres-password', variable: 'POSTGRES_PASSWORD')]) {
                         sh '''
@@ -66,7 +65,6 @@ spec:
                         '''
                     }
                 }
-            }
             }
         }
         
@@ -101,7 +99,7 @@ spec:
                                 git add "${HELM_CHART_PATH}"
                                 git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
                                 
-                                # Пушимо зміни до main branch (як вимагається)
+                                # Пушимо зміни до main branch
                                 git push origin HEAD:${HELM_REPO_BRANCH}
                             """
                         }
