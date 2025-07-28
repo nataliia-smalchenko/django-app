@@ -32,7 +32,7 @@ spec:
         IMAGE_NAME = "lesson-5-ecr"
         NEW_IMAGE_TAG = "${env.BUILD_ID}"
         HELM_REPO_URL = "https://github.com/nataliia-smalchenko/microservice-project.git"
-        HELM_REPO_BRANCH = "lesson-8-9"
+        HELM_REPO_BRANCH = "main"
         HELM_CHART_PATH = "lesson-7/charts/django-app/values.yaml"
         GITHUB_CREDENTIALS_ID = "github-token"
     }
