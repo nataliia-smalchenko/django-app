@@ -85,7 +85,7 @@ spec:
                                 git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
                                 
                                 # Пушимо зміни до main branch (як вимагається)
-                                git push origin HEAD:main
+                                git push origin HEAD:${HELM_REPO_BRANCH}
                             """
                         }
                     }
