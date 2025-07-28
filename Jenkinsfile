@@ -37,11 +37,6 @@ spec:
         GITHUB_CREDENTIALS_ID = "github-token"
     }
     stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
         
         stage('Build & Push Docker Image') {
             steps {
