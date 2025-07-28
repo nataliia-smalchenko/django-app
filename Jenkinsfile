@@ -34,10 +34,10 @@ spec:
         NEW_IMAGE_TAG = "${env.BUILD_ID}"
         HELM_REPO_URL = "https://github.com/nataliia-smalchenko/microservice-project.git"
         HELM_REPO_BRANCH = "main"
-        HELM_CHART_PATH = "lesson-7/charts/django-app/values.yaml"
+        HELM_CHART_PATH = "Project/charts/django-app/values.yaml"
         GITHUB_CREDENTIALS_ID = "github-token"
         
-        // Додайте ці змінні в Jenkins Environment Variables
+        // Змінні в Jenkins Environment Variables
         POSTGRES_HOST = "${env.POSTGRES_HOST ?: 'your-rds-endpoint.amazonaws.com'}"
         POSTGRES_PORT = "${env.POSTGRES_PORT ?: '5432'}"
         POSTGRES_NAME = "${env.POSTGRES_NAME ?: 'your_database'}"
