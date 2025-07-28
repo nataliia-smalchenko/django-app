@@ -56,7 +56,7 @@ spec:
         stage('Update Helm Chart & Push to Git') {
             steps {
                 container('git-cli') {
-                    withCredentials([string(credentialsId: "${GITHUB_CREDENTIALS_ID}", variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([usernamePassword(credentialsId: "${GITHUB_CREDENTIALS_ID}", usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
                         script {
                             sh """
                                 # Очищуємо робочу директорію
