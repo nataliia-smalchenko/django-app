@@ -35,21 +35,38 @@ spec:
         HELM_REPO_BRANCH = "main"
         HELM_CHART_PATH = "lesson-7/charts/django-app/values.yaml"
         GITHUB_CREDENTIALS_ID = "github-token"
+
+        
+        POSTGRES_HOST = "${env.POSTGRES_HOST}"
+        POSTGRES_PORT = "${env.POSTGRES_PORT ?: '5432'}"
+        POSTGRES_NAME = "${env.POSTGRES_NAME}"
+        POSTGRES_USER = "${env.POSTGRES_USER}"
+        POSTGRES_PASSWORD = "${env.POSTGRES_PASSWORD}"
+
     }
     stages {
         stage('Build & Push Docker Image') {
             steps {
+                steps {
                 container('kaniko') {
-                    sh '''
-                    /kaniko/executor \\
-                        --context `pwd` \\
-                        --dockerfile `pwd`/Dockerfile \\
-                        --destination=$ECR_REGISTRY/$IMAGE_NAME:$NEW_IMAGE_TAG \\
-                        --cache=true \\
-                        --insecure \\
-                        --skip-tls-verify
-                    '''
+                    withCredentials([string(credentialsId: 'postgres-password', variable: 'POSTGRES_PASSWORD')]) {
+                        sh '''
+                        /kaniko/executor \\
+                            --context `pwd` \\
+                            --dockerfile `pwd`/Dockerfile \\
+                            --destination=$ECR_REGISTRY/$IMAGE_NAME:$NEW_IMAGE_TAG \\
+                            --build-arg POSTGRES_HOST=$POSTGRES_HOST \\
+                            --build-arg POSTGRES_PORT=$POSTGRES_PORT \\
+                            --build-arg POSTGRES_NAME=$POSTGRES_NAME \\
+                            --build-arg POSTGRES_USER=$POSTGRES_USER \\
+                            --build-arg POSTGRES_PASSWORD=$POSTGRES_PASSWORD \\
+                            --cache=true \\
+                            --insecure \\
+                            --skip-tls-verify
+                        '''
+                    }
                 }
+            }
             }
         }
         
