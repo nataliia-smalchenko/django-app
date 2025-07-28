@@ -58,36 +58,36 @@ spec:
                 container('git-cli') {
                     withCredentials([string(credentialsId: "${GITHUB_CREDENTIALS_ID}", variable: 'GITHUB_TOKEN')]) {
                         script {
-                        // Клонуємо репозиторій з Helm-чартом у нову директорію
-                        sh """
-                            # Очищуємо робочу директорію
-                            rm -rf helm-repo
-                            
-                            # Клонуємо Helm репозиторій з аутентифікацією
-                            git clone --branch ${HELM_REPO_BRANCH} https://\${GITHUB_TOKEN}@github.com/nataliia-smalchenko/microservice-project.git helm-repo
-                            
-                            cd helm-repo
-                            
-                            # Встановлюємо yq
-                            apk add --no-cache yq
-                            
-                            # Оновлюємо поле image.tag у values.yaml
-                            yq eval '.image.tag = "${NEW_IMAGE_TAG}"' -i "${HELM_CHART_PATH}"
-                            
-                            # Оновлюємо також репозиторій образу
-                            yq eval '.image.repository = "${ECR_REGISTRY}/${IMAGE_NAME}"' -i "${HELM_CHART_PATH}"
-                            
-                            # Налаштовуємо git
-                            git config user.email "natalismalcenko@gmail.com"
-                            git config user.name "nataliia-smalchenko"
-                            
-                            # Додаємо зміни та комітимо
-                            git add "${HELM_CHART_PATH}"
-                            git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
-                            
-                            # Пушимо зміни до main branch (як вимагається)
-                            git push origin HEAD:main
-                        """
+                            sh """
+                                # Очищуємо робочу директорію
+                                rm -rf helm-repo
+                                
+                                # Клонуємо Helm репозиторій з аутентифікацією
+                                git clone --branch ${HELM_REPO_BRANCH} https://\${GITHUB_TOKEN}@github.com/nataliia-smalchenko/microservice-project.git helm-repo
+                                
+                                cd helm-repo
+                                
+                                # Встановлюємо yq
+                                apk add --no-cache yq
+                                
+                                # Оновлюємо поле image.tag у values.yaml
+                                yq eval '.image.tag = "${NEW_IMAGE_TAG}"' -i "${HELM_CHART_PATH}"
+                                
+                                # Оновлюємо також репозиторій образу
+                                yq eval '.image.repository = "${ECR_REGISTRY}/${IMAGE_NAME}"' -i "${HELM_CHART_PATH}"
+                                
+                                # Налаштовуємо git
+                                git config user.email "natalismalcenko@gmail.com"
+                                git config user.name "nataliia-smalchenko"
+                                
+                                # Додаємо зміни та комітимо
+                                git add "${HELM_CHART_PATH}"
+                                git commit -m "feat(deploy): Update image tag to ${NEW_IMAGE_TAG} for ${IMAGE_NAME} [ci skip]"
+                                
+                                # Пушимо зміни до main branch (як вимагається)
+                                git push origin HEAD:main
+                            """
+                        }
                     }
                 }
             }
